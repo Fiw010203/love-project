@@ -3,7 +3,7 @@ import { ref } from 'vue'
 
 const emit = defineEmits(['success'])
 
-const correctPassword = "1"
+const correctPassword = "123"
 const inputPassword = ref("")
 const isWrong = ref(false)
 

@@ -37,7 +37,7 @@ function loadPlayer() {
       'autoplay': 1,
       'loop': 1,
       'playlist': videoId,
-      'playsinline': 1 // 👈 สำคัญมากสำหรับมือถือ เพื่อไม่ให้เด้งเข้าแอป/เต็มจอ
+      'playsinline': 2 // 👈 สำคัญมากสำหรับมือถือ เพื่อไม่ให้เด้งเข้าแอป/เต็มจอ
     },
     events: {
       'onReady': (event) => {
@@ -82,12 +82,12 @@ function updateVolume() {
 
 <template>
   <div class="love-container">
-    <div id="youtube-player" style="position: absolute; bottom: 0; left: 0; width: 1px; height: 1px; opacity: 0; z-index: -1;"></div>
+    <div id="youtube-player" style="position: absolute; width: 0; height: 0; opacity: 0; pointer-events: none;"></div>
 
     <transition name="pop" mode="out-in">
       <div v-if="!answered" :key="'question'" class="content">
         <div class="icon-header">💖</div>
-        <h1>เป็นแฟนกันนะ 💕</h1>
+        <h1 class="main-title">เป็นแฟนกันนะ 💕</h1>
         <div class="btn-group">
           <button class="yes-btn" @click="sayYes">ตกลง ✨</button>
           <button 
@@ -103,28 +103,19 @@ function updateVolume() {
 
       <div v-else :key="'result'" class="content success-page">
         <div class="floating-hearts">
-          <span v-for="n in 10" :key="n">❤️</span>
+          <span v-for="n in 12" :key="n">❤️</span>
         </div>
         
         <div class="success-text-group">
-          <h1 class="bounce">เย้! รักกันนานๆ นะ ❤️</h1>
-          <p>บันทึกไว้ในความทรงจำเรียบร้อย 😊</p>
+          <h1 class="bounce result-title">เย้! รักกันนานๆ นะ ❤️</h1>
+          <p class="sub-text">บันทึกไว้ในความทรงจำเรียบร้อย 😊</p>
           
           <div class="volume-control">
             <span>🔈</span>
-            <input 
-              type="range" 
-              min="0" 
-              max="100" 
-              v-model="volume" 
-              @input="updateVolume"
-            />
+            <input type="range" min="0" max="100" v-model="volume" @input="updateVolume" />
             <span>🔊</span>
           </div>
-          
-          <p class="song-title">
-            🎵 อวดคนทั้งโลก (flex the world)
-          </p>
+          <p class="song-title">🎵 อวดคนทั้งโลก (flex the world)</p>
         </div>
       </div>
     </transition>
@@ -136,8 +127,7 @@ function updateVolume() {
 
 .love-container {
   position: fixed;
-  top: 0; left: 0;
-  width: 100vw; height: 100vh;
+  inset: 0;
   background-color: #FFD1D1;
   display: flex;
   justify-content: center;
@@ -146,86 +136,127 @@ function updateVolume() {
   overflow: hidden;
 }
 
-.content { 
-  text-align: center; 
-  padding: 20px; 
-  z-index: 10; /* ให้เนื้อหาอยู่ด้านบน */
+.content {
+  position: relative;
+  text-align: center;
   width: 100%;
+  padding: 20px;
+  z-index: 10;
 }
 
-/* จัดกลุ่มข้อความหน้า Success ให้อยู่เหนือหัวใจ */
+/* จัดการลำดับเลเยอร์หน้า Success */
 .success-text-group {
   position: relative;
-  z-index: 20;
+  z-index: 50; /* ให้ตัวหนังสืออยู่สูงกว่าหัวใจเสมอ */
 }
 
-.icon-header { font-size: 80px; margin-bottom: 10px; animation: heartbeat 1.5s infinite; }
-h1 { color: white; font-size: 2.2rem; text-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 40px; }
-.btn-group { display: flex; justify-content: center; align-items: center; gap: 20px; min-height: 100px; }
-
-button {
-  font-size: 1.3rem; padding: 12px 30px; border-radius: 50px; border: none;
-  cursor: pointer; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-  transition: transform 0.2s;
+/* หัวใจลอย (พื้นหลัง) */
+.floating-hearts {
+  position: absolute;
+  inset: 0;
+  z-index: 5; /* อยู่ต่ำกว่าตัวหนังสือ */
+  pointer-events: none; /* ป้องกันหัวใจบังนิ้วตอนจะเลื่อนปรับเสียง */
 }
-.yes-btn { background: #FF4D6D; color: white; }
-.no-btn { background: #ffffff; color: #888; }
 
+/* ปรับขนาดตัวหนังสือให้เหมาะกับมือถือ */
+.main-title {
+  color: white;
+  font-size: 2rem;
+  margin-bottom: 40px;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.result-title {
+  color: white;
+  font-size: 1.8rem; /* เล็กลงนิดหน่อยเพื่อไม่ให้ล้นในมือถือ */
+  line-height: 1.4;
+  margin-bottom: 10px;
+}
+
+.sub-text {
+  color: white;
+  font-size: 1.1rem;
+  margin-bottom: 20px;
+}
+
+/* ส่วนควบคุมเสียง */
 .volume-control {
   margin: 20px auto;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 12px;
   background: rgba(255, 255, 255, 0.4);
-  padding: 8px 15px;
-  border-radius: 20px;
+  padding: 10px 20px;
+  border-radius: 30px;
   width: fit-content;
 }
 
-input[type="range"] { accent-color: #FF4D6D; }
+input[type="range"] {
+  accent-color: #FF4D6D;
+  cursor: pointer;
+}
 
-.song-title { font-size: 0.8rem; opacity: 0.8; color: white; }
+.song-title {
+  font-size: 0.85rem;
+  color: white;
+  opacity: 0.9;
+}
 
+/* ปุ่มต่างๆ */
+.btn-group {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  min-height: 80px;
+}
+
+button {
+  font-size: 1.2rem;
+  padding: 12px 30px;
+  border-radius: 50px;
+  border: none;
+  font-weight: bold;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  transition: transform 0.2s;
+}
+
+.yes-btn { background: #FF4D6D; color: white; cursor: pointer; }
+.no-btn { background: #ffffff; color: #888; }
+
+/* Animations */
 @keyframes heartbeat {
   0%, 30%, 60% { transform: scale(1); }
-  15% { transform: scale(1.2); }
-  45% { transform: scale(1.15); }
+  15% { transform: scale(1.15); }
 }
+.icon-header { font-size: 70px; animation: heartbeat 1.5s infinite; }
+
 .bounce { animation: bounce 1s infinite; }
 @keyframes bounce {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-15px); }
 }
 
-.pop-enter-active, .pop-leave-active { transition: all 0.5s ease; }
-.pop-enter-from { opacity: 0; transform: scale(0.8); }
-.pop-leave-to { opacity: 0; transform: scale(1.2); }
-
-/* แก้ไขหัวใจให้ไปอยู่เลเยอร์หลังตัวหนังสือ */
-.floating-hearts {
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  z-index: 5; /* อยู่หลัง success-text-group */
-  pointer-events: none; /* กดทะลุได้ */
-}
-
 .floating-hearts span {
-  position: absolute; bottom: -50px;
-  animation: float 3s linear infinite; opacity: 0;
+  position: absolute;
+  bottom: -50px;
+  font-size: 24px;
+  animation: floatUp 4s linear infinite;
+  opacity: 0;
 }
-@keyframes float {
-  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+
+@keyframes floatUp {
+  0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+  20% { opacity: 1; }
   100% { transform: translateY(-110vh) rotate(360deg); opacity: 0; }
 }
 
-/* กระจายหัวใจให้ทั่วจอขึ้น */
-.floating-hearts span:nth-child(1) { left: 5%; animation-delay: 0s; }
-.floating-hearts span:nth-child(2) { left: 15%; animation-delay: 0.5s; }
-.floating-hearts span:nth-child(3) { left: 25%; animation-delay: 1.2s; }
-.floating-hearts span:nth-child(4) { left: 45%; animation-delay: 0.8s; }
-.floating-hearts span:nth-child(5) { left: 65%; animation-delay: 1.5s; }
-.floating-hearts span:nth-child(6) { left: 85%; animation-delay: 0.3s; }
-.floating-hearts span:nth-child(7) { left: 95%; animation-delay: 1.1s; }
+/* กระจายหัวใจ */
+.floating-hearts span:nth-child(1) { left: 10%; animation-delay: 0s; }
+.floating-hearts span:nth-child(2) { left: 25%; animation-delay: 1s; }
+.floating-hearts span:nth-child(3) { left: 40%; animation-delay: 2s; }
+.floating-hearts span:nth-child(4) { left: 55%; animation-delay: 0.5s; }
+.floating-hearts span:nth-child(5) { left: 70%; animation-delay: 1.5s; }
+.floating-hearts span:nth-child(6) { left: 85%; animation-delay: 2.5s; }
 </style>
